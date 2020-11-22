@@ -1,0 +1,142 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.returnUrl = Request.QueryString["returnUrl"];
+}
+
+<div class="row align-items-center justify-content-md-center h-p100">
+    <div class="col-lg-3 col-md-8 col-12 d-none d-lg-block">
+        <div class="box mb-0 b-0 bg-transparent">
+            <div class="box-body login-slider p-0">
+                <div id="carousel-example-generic-captions" class="carousel slide" data-ride="carousel">
+                    <!-- Indicators -->
+                    <ol class="carousel-indicators">
+                        <li data-target="#carousel-example-generic-captions" data-slide-to="0" class="active"></li>
+                        <li data-target="#carousel-example-generic-captions" data-slide-to="1"></li>
+                        <li data-target="#carousel-example-generic-captions" data-slide-to="2"></li>
+                    </ol>
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner" role="listbox">
+                        <div class="carousel-item active">
+                            <img src="~/images/slider/slide-1.jpg" class="img-fluid" alt="slide-1">
+                            <div class="carousel-caption">
+                                <h3>First here</h3>
+                                <p>this is the subcontent you can use this</p>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="~/images/slider/slide-2.jpg" class="img-fluid" alt="slide-2">
+                            <div class="carousel-caption">
+                                <h3>Second here</h3>
+                                <p>this is the subcontent you can use this</p>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="~/images/slider/slide-3.jpg" class="img-fluid" alt="slide-3">
+                            <div class="carousel-caption">
+                                <h3>Third here</h3>
+                                <p>this is the subcontent you can use this</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-8 col-12">
+        <div class="login-box">
+            <div class="login-box-body">
+                <div style="margin-left:35%;">
+                    <img src="~/images/logo-light.png" alt="logo" class="light-logo">
+                </div>
+                <h3 class="text-center text-white" style="font-size:30px;">Esame-Pharma</h3>
+                <p class="login-box-msg">Connectez-vous pour commencer votre session</p>
+                @using (Html.BeginForm("Login", "Users", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { id = "form-login" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group has-feedback">
+                        <input type="email" class="form-control rounded" placeholder="Email" id="Email" required>
+                        <span class="ion ion-email form-control-feedback"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <input type="password" class="form-control rounded" placeholder="Password" id="Password" required>
+                        <span class="ion ion-locked form-control-feedback"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="basic_checkbox_1">
+                                <label for="basic_checkbox_1">Remember Me</label>
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-6">
+                            <div class="fog-pwd text-right">
+                                <a href="@Url.Action("PasswordRecovery","admin")" class="text-danger"><i class="ion ion-locked"></i> Forgot pwd?</a><br>
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-info btn-block margin-top-10" id="btn-login">SE CONNECTER</button>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                }
+                <div class="social-auth-links text-center">
+                    <p>- OR -</p>
+                    <a href="#" class="btn btn-outline btn-light btn-social-icon"><i class="fa fa-facebook"></i></a>
+                    <a href="#" class="btn btn-outline btn-light btn-social-icon"><i class="fa fa-google-plus"></i></a>
+                    <a href="#" class="btn btn-outline btn-light btn-social-icon"><i class="fa fa-twitter"></i></a>
+                    <a href="#" class="btn btn-outline btn-light btn-social-icon"><i class="fa fa-instagram"></i></a>
+                </div>
+                <!-- /.social-auth-links -->
+
+                <div class="margin-top-30 text-center">
+                    <p>Vous n'avez pas de compte? <a href="@Url.Action("Inscription","admin")" class="text-warning ml-5">S'inscrire</a></p>
+                </div>
+
+            </div>
+            <!-- /.login-box-body -->
+        </div>
+        <!-- /.login-box -->
+
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $(function () {
+            $("#form-login").submit(function (e) {
+                e.preventDefault();
+                var value = { username: $('#Email').val(), password: $('#Password').val() };
+                $.ajax({
+                    url: "@Url.Action("login","admin")",
+                    type: 'POST',
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(value),
+                    beforeSend: function () {
+                        $('#btn-login').html('<i class="fa fa-spinner fa-spin"></i> Connexion...');
+                        $('#btn-login').attr('disabled',true);
+                    },
+                    success: function (result) {
+                        $('#btn-login').html('SE CONNECTER');
+                        $('#btn-login').attr('disabled', false);
+                        if (result.success) {
+                            location.href = "@Url.Action("index","admin")/" + result.message + "?returnUrl=@ViewBag.returnUrl";
+                        }
+                        else
+                        alert(result.message);
+                    },
+                    error:function(xhr) {
+                        $('#btn-login').html('SE CONNECTER');
+                        $('#btn-login').attr('disabled', false);
+                        alert("error = " + xhr.responseText);
+                    }
+                });
+            });
+        });
+    });
+</script>

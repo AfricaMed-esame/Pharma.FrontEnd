@@ -1,0 +1,33 @@
+﻿@{
+    ViewBag.Title = "Success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row align-items-center justify-content-md-center h-p100">
+    <div class="col-lg-12 col-md-8 col-12">
+        <div class="box box-solid" style="background-color:#225394;">
+            <div class="box-header with-border bg-sol" style="color:#fff;">
+                <h4 class="box-title">E-SAME PHARMA</h4>
+                <h6 class="box-subtitle"></h6>
+            </div>
+            <div class="shadow p-3 mb-5 bg-white rounded col-md-12">
+               
+                @if (ViewBag.username != "" && ViewBag.username != null)
+                {
+                <div class="alert alert-success alert-dismissible">
+                    <h4><i class="icon fa fa-check"></i> Succèss</h4>
+                    <p>@ViewBag.message</p>
+                    <p>Nous avons envoyé un mail de confirmation à l'adresse  &quot;@ViewBag.username&quot;, Connectez vous à votre messagerie et suivez les instructions pour confirmer votre compte.</p>
+                    <p>Si vous rencontrez des difficultés pour confirmer votre compte ou si vous avez des questions, <a href="mailto:contact@secondavismedical.fr">contactez-nous</a></p>
+                    <p>&mdash; L'Equipe Africa-Med</p>
+                    <button type="button" onclick="window.open('http://www.africa-med.eu');" class="btn btn-primary">Visiter notre site</button>
+                    <button type="button" onclick="window.open('@Url.Action("login","admin")','_self');" class="btn btn-info">Se connecter</button>
+                </div>
+                }
+            </div>
+           
+           
+        </div>
+
+    </div>
+</div>
+

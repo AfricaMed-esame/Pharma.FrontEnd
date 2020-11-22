@@ -1,0 +1,283 @@
+﻿
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row align-items-center justify-content-md-center h-p100">
+    <div class="col-lg-12 col-md-8 col-12">
+        <div class="box box-solid" style="background-color:#225394;font-family:poppins;">
+            <div class="box-header with-border bg-sol" style="color:#fff;">
+                <h4 class="box-title">E-SAME PHARMA</h4>
+                <h6 class="box-subtitle">Créer votre compte pour commencer</h6>
+                <p class="pull-right" style="margin-top:-3%;">Vous avez déjà un compte? <a href="@Url.Action("login","admin")" class="text-warning ml-5">Se connecter</a></p>
+            </div>
+            @if (ViewBag.message != "" && ViewBag.message != null)
+            {
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h4><i class="icon fa fa-ban"></i> Echec!</h4>
+                    @ViewBag.message
+                </div>
+            }
+            <!-- /.box-header -->
+            <div class="box-body wizard-content" style="overflow:auto;height:500px;">
+                @using (Html.BeginForm("Account-register", "Admin", FormMethod.Post, new { id = "form-register", @class = "validation-wizard wizard-circle" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <!-- Step 1 -->
+                    <h6>Etape 1</h6>
+                    <section>
+                        <h5 class="text-info">Informtion d'identiication</h5>
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wfirstName2"> Raison Social : <span class="tex-danger">*</span> </label>
+                                    <input type="text" class="form-control required" id="firstname" name="firstname">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wlastName2"> Rccm : <span class="tex-danger">*</span> </label>
+                                    <input type="text" class="form-control required" id="rccm" name="rccm">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wemailAddress2"> Adresse Email : <span class="tex-danger">*</span> </label>
+                                    <input type="email" class="form-control required" id="email" name="email">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wemailAddress2"> Mot de passe : <span class="tex-danger">*</span> </label>
+                                    <input type="password" class="form-control required" id="password" name="password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wphoneNumber2">Contact :<span class="tex-danger">*</span></label>
+                                    <input type="tel" class="form-control" required id="contact" name="contact">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wphoneNumber2">Addresse :</label>
+                                    <input type="tel" class="form-control" id="address" name="address">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Step 2 -->
+                    <h6>Etape 2</h6>
+                    <section>
+                        <h5 class="text-info">Informtions Sociétés</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="jobTitle3">Responsable :</label>
+                                    <input type="text" class="form-control required" id="manager" name="manager">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="webUrl3">Contact Responsable :</label>
+                                    <input type="text" class="form-control required" id="mcontact" name="mcontact">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wlocation2"> Pays : <span class="danger">*</span> </label>
+                                    @Html.DropDownList("country", ViewBag.countries as SelectList, "--Choisir--", htmlAttributes: new { required = true, data_validation_required_message = "Champs obligatoire", @class = "form-control", @name = "country", id = "country" })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wdate2">Ville :</label>
+                                    <input type="text" class="form-control" id="city" required name="city">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="wlocation2"> DEVISE : <span class="danger">*</span> </label>
+                                    @Html.DropDownList("currency", ViewBag.currencies as SelectList, "--DEVISE DE PAIEMENT--", htmlAttributes: new { required = true, data_validation_required_message = "Champs obligatoire", @class = "form-control", @name = "currency", id = "currency" })
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="wlocation2"> Fuseau Horaire : <span class="danger">*</span> </label>
+                                    @Html.DropDownList("timezone", ViewBag.timezones as SelectList, "--FUSEAU HORAIRE--", htmlAttributes: new { required = true, data_validation_required_message = "Champs obligatoire", @class = "form-control", @name = "timezone", id = "timezone" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="shortDescription3">Description (Autre information)  :</label>
+                                    <textarea name="desc" id="desc" rows="3" class="form-control"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+                    <!-- Step 3 -->
+                    <h6>Etape 3</h6>
+                    <section>
+                        <h5 class="text-info">Géolocalisation</h5>
+                        <p>Aidez vos clients à vous retrouver facilement. <br /> <strong class="text-danger">NB : Il est recommendé de réaliser cette etape à partir de votre pharmacie, ceci nous permettra d'avoir votre localisation exacte. Il sera plus facile pour vos clients de vous retrouver. Néanmoins en fonction de votre region la position obtenue peut être approximative. Si c'est le cas pour vous, veuillez indiquer votre position exacte en cliquant sur la carte qui s'affiche après la géolocalisation.<br /><br />Vous pouvez également accentuer  la précision de votre localisation en y inscrivant une référence avant de géolocaliser (Ex. lieu publique près de chez vous, N° de rue, etc)</strong></p>
+                        <div class="row m-t-5">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wdate2">Références</label>
+                                    <input type="text" class="form-control" id="txt-filter" placeholder="N° Rue, Lieu publique, etc..." name="txt-filter">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group margin-top-20">
+                                    <button type="button" class="btn btn-info" id="btn-geo">Géolocaliser maintenant</button>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <input type="hidden" class="form-control" id="lat" name="lat" />
+                        <input type="hidden" class="form-control" id="long" name="long" />
+                        <div class="row" id="map" style="height:200px">
+
+                        </div>
+                    </section>
+                    <!-- Step 4 -->
+                    <h6>Etape 4</h6>
+                    <section>
+                        <h5 class="text-info">Conditions d'utilisation</h5>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <textarea readonly class="form-control" rows="8">
+                                     Ici vous pourrez ajouter vos conditions d'utilisation
+                                    </textarea>
+                                </div>
+                                <div class="checkbox">
+                                    <input type="checkbox" id="basic_checkbox_1">
+                                    <label for="basic_checkbox_1">J'accepte les conditions d'utilisation</label>
+                                </div>
+                                @*<div class="form-group pull-right" id="data-submit" style="display:none;">
+                                        <button type="submit" class="btn btn-success">Enregistrer</button>
+                                    </div>*@
+                            </div>
+                        </div>
+                    </section>
+                }
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+    </div>
+</div>
+<!-- modal with loader for submit request -->
+
+<link href="~/assets/vendor_components/sweetalert/sweetalert.css" rel="stylesheet" type="text/css">
+<script src="~/assets/vendor_components/sweetalert/sweetalert.min.js"></script>
+<!-- Validation wizard -->
+<script src="~/assets/vendor_components/jquery-steps-master/build/jquery.steps.js"></script>
+<!-- validate  -->
+<script src="~/assets/vendor_components/jquery-validation-1.17.0/dist/jquery.validate.min.js"></script>
+<!-- Sweet-Alert  -->
+<script src="~/assets/vendor_components/sweetalert/sweetalert.min.js"></script>
+<!-- wizard  -->
+<script src="~/Scripts/js/pages/steps.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $('#btn-geo').click(function () {
+            $(this).html('<span class="fa fa-spinner fa-spin"></span> Patientez...');
+            $(this).attr('disbaled', true);
+            var map, infoWindow;
+            var geocoder = new google.maps.Geocoder;
+            infoWindow = new google.maps.InfoWindow;
+            // Try HTML5 geolocation.
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var latlng =
+                    {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    geocoder.geocode({ 'address': $('#firstname').val() + " " + $('#country :selected').text() + " " + $('#city').val() + " " + $('#txt-filter').val() }, function (results, status) {
+                        if (status === 'OK') {
+                            $('#btn-geo').html('Géolocaliser');
+                            $('#btn-geo').attr('disbaled', false);
+                            if (results[0]) {
+                                $('#lat').val(results[0].geometry.location.lat());
+                                $('#long').val(results[0].geometry.location.lng());
+                                var pos = {
+                                    lat: results[0].geometry.location.lat(),
+                                    lng: results[0].geometry.location.lng()
+                                };
+                                var mapOptions = {
+                                    center: pos,
+                                    zoom: 15
+                                };
+                                map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+                                var marker = new google.maps.Marker({
+                                    position: pos,
+                                    map: map,
+                                    draggable: true,
+                                    title: $('#firstname').val()
+                                });
+                                map.addListener('center_changed', function () {
+                                    // 3 seconds after the center of the map has changed, pan back to the
+                                    // marker.
+                                    window.setTimeout(function () {
+                                        map.panTo(marker.getPosition());
+                                    }, 120000);
+                                });
+
+                                map.addListener('click', function (e) {
+                                    marker.setPosition(e.latLng);
+                                    map.panTo(e.latLng);
+                                    $('#lat').val(e.latLng.lat());
+                                    $('#long').val(e.latLng.lng());
+                                });
+
+                                marker.addListener('dblclick', function () {
+                                    map.setZoom(map.getZoom() + 1);
+                                    map.setCenter(marker.getPosition());
+                                });
+                            }
+                            else {
+                                $('#btn-geo').html('Géolocaliser maintenant');
+                                $('#btn-geo').attr('disbaled', false);
+                                swal("Echec", "No results found", "warning");
+                            }
+                        }
+                        else {
+                            $('#btn-geo').html('Géolocaliser maintenant');
+                            $('#btn-geo').attr('disbaled', false);
+                            swal("Geocoder failed due to: " + status, "warning", "error");
+                        }
+                    });
+                }, function () {
+                    handleLocationError(true, infoWindow, map.getCenter());
+                });
+            } else {
+                $('#btn-geo').html('Géolocaliser maintenant');
+                $('#btn-geo').attr('disbaled', false);
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
+        });
+    });
+
+    function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+            'Error: The Geolocation service failed.' :
+            'Error: Your browser doesn\'t support geolocation.');
+        infoWindow.open(map);
+    }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLDI3KBWLlh2l7tKmhBq9JYV8fNxRcUyE&&libraries=places">
+</script>
+<!-- /.box -->

@@ -1,0 +1,126 @@
+﻿@using SureNkap.EsameService
+@{
+    var user = (Pharmacies)Session["user"];
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/js")
+    @RenderSection("Datatables",required:false)
+    @RenderSection("Editables",required:false)
+</head>
+<body class="hold-transition skin-green sidebar-mini">
+    <div class="wrapper">
+        <header class="main-header">
+            <!-- Logo -->
+            <a href="index.html" class="logo">
+                <!-- mini logo -->
+                <b class="logo-mini">
+                    <span class="light-logo"><img src="~/images/logo-light.png" alt="logo"></span>
+                </b>
+                <!-- logo-->
+                <span class="logo-lg">
+                    <img src="~/images/logo-light-text.png" alt="logo" class="light-logo">
+                </span>
+            </a>
+            <!-- Header Navbar -->
+            <nav class="navbar navbar-static-top">
+            
+            </nav>
+        </header>
+
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <!-- sidebar-->
+            <section class="sidebar">
+
+                <!-- sidebar menu-->
+                <ul class="sidebar-menu" data-widget="tree" id="menu">
+                    <li class="user-profile treeview">
+                        <a href="#">
+                            <img src="~/images/user5-128x128.jpg" alt="user">
+                            <span>@user.CommercialName</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-right pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="@Url.Action("Profil","admin",new { id = user.Id })"><i class="fa fa-gears mr-5"></i>Paramètres </a></li>
+                            <li><a href="javascript:void()"><i class="fa fa-envelope-open mr-5"></i>Boite de reception</a></li>
+                            <li><a href="@Url.Action("LogOut","admin")"><i class="fa fa-power-off mr-5"></i>Deconnexion</a></li>
+                        </ul>
+                    </li>
+                    <li @if (Request.QueryString["group"] == "home") { Write("class=active"); }>
+                        <a href="@Url.Action("index","admin",new { id = user.Id})?group=home&page=dashboard">
+                            <i class="fa fa-dashboard"></i> <span>Accueil</span>
+                        </a>
+                    </li>
+                    <li @if (Request.QueryString["group"] == "demandes") { Write("class=active"); } else { Write("class=treeview"); }>
+                        <a href="#">
+                            <i class="fa fa-files-o"></i>
+                            <span>Demandes & Proforma</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-right pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li @if (Request.QueryString["page"] == "ordonnances") { Write("class=active"); }><a href="@Url.Action("demandes","admin")?group=demandes&page=ordonnances"><i class="fa fa-circle-thin"></i>Mes Demandes</a></li>
+                            <li @if (Request.QueryString["page"] == "proforma") { Write("class=active"); }><a href="@Url.Action("quotes","admin")?group=demandes&page=proforma"><i class="fa fa-circle-thin"></i>Mes Proformas</a></li>
+                        </ul>
+                    </li>
+                    <li @if (Request.QueryString["group"] == "commandes") { Write("class=active"); }>
+                        <a href="@Url.Action("orders","admin")?group=commandes&page=list">
+                            <i class="fa fa-shopping-cart"></i>
+                            <span>Commandes</span>
+                        </a>
+                    </li>
+                    <li @if (Request.QueryString["group"] == "factures") { Write("class=active"); }>
+                        <a href="@Url.Action("paiements","admin")?group=factures&page=list">
+                            <i class="fa fa-file-text"></i>
+                            <span>Factures</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("logout","admin")">
+                            <i class="fa fa-power-off"></i>
+                            <span>Deconnexion</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </section>
+        </aside>
+        <div class="content-wrapper">
+            <section class="content-header">
+                @if (!user.Active)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fa fa-warning"></i> Bonjour, merci de renseigner votre numéro d'abonnement fournir par votre prestataire <a href="@Url.Action("settings", "admin")">Espace compte</a>
+                    </div>
+                }
+                <h3 class="box-title text-info">@ViewContext.ViewData["title"]</h3>
+               
+            </section>
+            @RenderBody()
+        </div>
+        <footer class="main-footer">
+            &copy; 2019 <a href="http://www.africa-med.eu/" target="_blank">Africa Med SA</a>. Tous droits reservés.
+        </footer>
+    </div>
+    <script>
+        $.widget.bridge('uibutton', $.ui.button);
+    </script>
+</body>
+</html>
+ <script>
+        $.widget.bridge('uibutton', $.ui.button);
+        $(document).ready(function () {
+            $('#menu').on("click", "li", function () {
+                $("li.active").removeClass("active");
+                $(this).addClass("active");
+            });
+        });
+</script>

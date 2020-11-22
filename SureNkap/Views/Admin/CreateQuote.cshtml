@@ -1,0 +1,316 @@
+﻿@using SureNkap.EsameService
+@model Pharmacies
+@{
+    ViewBag.Title = "CreateDevis";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var req = (QuoteRequestModel)ViewBag.request;
+}
+<div class="col-12">
+    <div class="box box-solid bg-dark">
+        <div class="box-header with-border">
+            <h4 class="box-title">Nouvelle proforma</h4>
+            <h6 class="box-subtitle">Cliquez sur le bouton éditer d'une ligne pour entrer les prix. Si vous rencontrez des difficultés, contactez notre centre d'appels, ou consulter la  <a class="text-warning" href="https://secondavismedical.fr/Home/Faq_Patient" target="_blank">documentation officiel </a></h6>
+            <ul class="box-controls pull-right">
+                @*<li><a class="box-btn-close" href="#"></a></li>
+                    <li><a class="box-btn-slide" href="#"></a></li>*@
+                <li><a class="box-btn-fullscreen" href="#"></a></li>
+            </ul>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <hr />
+            <div class="row">
+                <div class="col-lg-6 col-12">
+                    <div class="form-group">
+                        <h5>Client</h5>
+                        <div class="controls">
+                            <input type="text" disabled class="form-control" value="@req.Clients" />
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="tbl-devis" class="table table-hover" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Désignation</th>
+                            <th>Equivalents</th>
+                            <th>Prix Unitaire (@Model.Currency)</th>
+                            <th>Qte</th>
+                            <th>Nature</th>
+                            <th>Total (@Model.Currency)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="text-danger" style="font-size:16px;text-align:right;" colspan="5">Montant Total</th>
+                            <th class="text-danger" style="font-size:16px;text-align:left;" colspan="2">0</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <button type="button" class="btn btn-info  pull-right" id="btn-create-devis" style="margin-top:5px;">Enregistrer</button>
+            <a href="@Url.Action("demandes","admin")" class="btn btn-default m-lg-5 pull-right">Retour à la liste des demandes</a>
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+</div>
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="Tranche de prix" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myLargeModalLabel">Nouvelle tranche de prix</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <form class="form-horizontal form-element" id="form-upd-price">
+                <div class="modal-body">
+                    <h3><small class="text-danger">NB: Utiliser le point "." comme séparateur décimal</small></h3>
+                    <div class="box-body">
+                        <input type="hidden" id="productId" value="" />
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-2 control-label">Equivalent</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="equivalent" placeholder="Equivalent">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword2" class="col-sm-2 control-label">Prix</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="price" required placeholder="Prix Unitaire">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 control-label">Quantité</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="qty" required placeholder="Quantité">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword4" class="col-sm-2 control-label">Unité</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="unit" required placeholder="Unité">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger waves-effect text-left" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary text-left">Enregistrer</button>
+                </div>
+            </form>
+
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+@section Editables
+{
+    @Scripts.Render("~/bundles/editable")
+    @Styles.Render("~/Content/datatables")
+    @Scripts.Render("~/bundles/datatables")
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        var Sum = 0;
+        $('#tbl-devis').dataTable({
+        'ajax':
+        {
+            url: "@Url.Action("QuoteRequestSample", "admin")",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: function () {
+                return JSON.stringify({
+                    id: "@req.Id"
+                });
+            }
+        },
+        'paging': true,
+        'sort': true,
+        'searching': true,
+        'columns': [
+            { 'data': 'Product' },
+            { 'data': 'Equivalent' },
+            { 'data': 'UnitPrice' },
+            { 'data': 'Quantity' },
+            { 'data': 'Unit' },
+            { 'data': 'Total' },
+            {
+                'data': 'ProductId',
+                'render': function (ProductId) {
+                    return '<button class="btn btn-success btn-sm margin-r-5 editer" name="' + ProductId + '"><i class="fa fa-pencil"></i> Editer</button>';
+                }
+            }
+            ],
+            "footerCallback": function (row, data, start, end, display) {
+                var api = this.api(), data;
+                var intVal = function (i) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '') * 1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+
+                // Total over all pages
+                total = api
+                    .column(5)
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                Sum = total;
+
+                $(api.column(5).footer()).html(
+                    total
+                );
+              
+            },
+            "language":
+            {
+                "info": "Afficher la page _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucune donnée à afficher",
+                "infoFiltered": " - Trié de _MAX_ enregistrement",
+                "lengthMenu": "Afficher _MENU_ enregistrements",
+                "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                "loadingRecords": "Veillez patienter - Chargement...",
+                "processing": "DataTables est actuellement occupé",
+                "search": "RECHERCHE:",
+                "zeroRecords": "Aucun enregistrement à afficher",
+                "paginate":
+                {
+                    "next": "Suivant",
+                    "last": "Dernière Page",
+                    "first": "Première Page",
+                    "previous": "Précédent",
+                    "emptyTable": "aucune donnée disponible",
+
+                },
+
+            }
+        });
+
+        $('#btn-create-devis').click(function () {
+            if (Sum == 0) {
+                swal("Proforma invalide", "votre proforma n'as aucun prix", "warning");
+                return;
+            }
+            swal({
+                title: "Proforma, total = " + Sum + " @Model.Currency ?",
+                text: "Continuer et enregistrer ",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Oui, Enregistrer!",
+                cancelButtonText: "Non, annuler!",
+                closeOnConfirm: false,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm)
+                {
+                    $.ajax({
+                    url: "@Url.Action("SaveProforma", "admin")",
+                    type: "post",
+                    contentType: "application/json",
+                    dataType: "json",
+                    beforeSend:function () {
+                        $('#btn-create-devis').html('<span class="fa fa-spinner fa-spin"></span> Patientez...');
+                        $('#btn-create-devis').attr('disabled', true);
+                    },
+                    data: JSON.stringify({
+                        patientId: "@req.ClientId",
+                        req:"@req.Id",
+                        productIds:"@Request.QueryString.Get("products")"
+                    }),
+                    success: function (rs) {
+                        if (rs.success) {
+                            location.href = "@Url.Action("quotes", "admin")";
+                        }
+                        else {
+                            swal("Echec", rs.message, "error");
+                        }
+                    },
+                    error: function (xhr) {
+                        swal("Erreur", xhr.responseText, "error");
+                    }
+                });
+                }
+            });
+        });
+
+        $("#tbl-devis tbody").on('click','button.editer', function () {
+            var id = $(this).attr('name');
+            $.ajax({
+                url: "@Url.Action("EditRow","admin")",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify({ productId: id }),
+                success: function (data) {
+                    $('#myLargeModalLabel').html(data.Product);
+                    $('#equivalent').val(data.Equivalent);
+                    $('#price').val(data.UnitPrice);
+                    $('#qty').val(data.Quantity);
+                    $('#unit').val(data.Unit);
+                    $('#productId').val(id);
+                    $('.bs-example-modal-lg').modal();
+                },
+                error: function (err) {
+                    swal("Erreur", err.responseText, "error");
+                }
+            });
+        });
+
+    $('#form-upd-price').submit(function (e) {
+        e.preventDefault();
+        // check if price is correct value
+        if (isNaN($('#price').val()) || $('#price').val() == 0 || parseFloat($('#price').val()) < 0) {
+            swal("Format incorrect", "Le prix doit être un nombre entier positif ou décimal  ", "warning");
+            return false;
+        }
+
+        if (isNaN($('#qty').val()) || $('#qty').val() == 0 || parseFloat($('#qty').val())<0) {
+            swal("Format incorrect", "La quantité doit être un nombre entier positif", "warning");
+            return false;
+        }
+        $.ajax({
+            url: "@Url.Action("SaveRow","admin")",
+            type: "post",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify({
+                eq: $('#equivalent').val(),
+                p: $('#price').val(),
+                q: $('#qty').val(),
+                n: $('#unit').val(),
+                id: $('#productId').val()
+            }),
+            success: function (result) {
+                if (result.success) {
+                    swal("Succès", "Enregistré", "success");
+                    $('#tbl-devis').DataTable().ajax.reload();
+                    $('#equivalent').val('');
+                    $('#price').val('');
+                    $('#qty').val('');
+                    $('#unit').val(''),
+                    $('#productId').val('');
+                    $('.bs-example-modal-lg').modal('toggle');
+                }
+                else {
+                    swal("Echec", result.message, "error");
+                }
+            },
+            error: function (err) {
+                swal("Erreur", err.responseText, "error");
+            }
+        });
+    });
+
+    });
+</script>
+

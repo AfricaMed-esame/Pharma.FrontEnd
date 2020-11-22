@@ -1,0 +1,100 @@
+﻿@using SureNkap.EsameService
+@model Pharmacies
+@{
+    ViewBag.Title = "Payments";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="col-12">
+    <div class="box">
+       
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="table-responsive">
+                <table id="tbl-invoices" class="table table-bordered table-striped dataTable">
+                    <thead>
+                        <tr>
+                            <th>N° Facture</th>
+                            <th>Clients</th>
+                            <th>Descriptions</th>
+                            <th>Montant Total</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+</div>
+@section Datatables
+{
+    @Styles.Render("~/Content/datatables")
+    @Scripts.Render("~/bundles/datatables")
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl-invoices').dataTable({
+            'ajax':
+            {
+                url: "@Url.Action("GetInvoices", "admin")",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: function () {
+                    return JSON.stringify({
+                        id: "@Model.Id"
+                    });
+                }
+
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            'columns': [
+                { 'data': 'Id' },
+                {
+                    'data': 'User',
+                    'render': function (User) {
+                        return User.Names + " " + User.Surname;
+                    }
+                },
+                { 'data': 'Description' },
+                { 'data': 'Amount' },
+                { 'data': 'Date'},
+                {
+                    'data': 'Id',
+                    'render': function(Id) {
+                        return '<button class="btn btn-info btn-sm btn-sm m-lg-5 print" href="#" name="' + Id + '"><i class="fa fa-printer"></i> Imprimer</button>';
+                    }
+                }
+
+            ],
+            "language":
+            {
+                "info": "Afficher la page _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucune donnée à afficher",
+                "infoFiltered": " - Trié de _MAX_ enregistrement",
+                "lengthMenu": "Afficher _MENU_ enregistrements",
+                "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                "loadingRecords": "Veillez patienter - Chargement...",
+                "processing": "DataTables est actuellement occupé",
+                "search": "RECHERCHE:",
+                "zeroRecords": "Aucun enregistrement à afficher",
+                "paginate":
+                {
+                    "next": "Suivant",
+                    "last": "Dernière Page",
+                    "first": "Première Page",
+                    "previous": "Précédent",
+                    "emptyTable": "aucune donnée disponible",
+
+                },
+
+            }
+        });
+    });
+</script>
+

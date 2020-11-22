@@ -1,0 +1,274 @@
+﻿@using SureNkap.EsameService
+@model OrderPdf
+@{
+    ViewBag.Title = "OrderDetails";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    decimal total = 0;
+    decimal totalTTC = 0;
+    decimal tva = 0;
+    int i = 1;
+}
+<div class="pad margin no-print">
+    @if (Model.Status == Orders.Statut.Paid)
+    {
+        <div class="callout callout-primary" style="margin-bottom: 0!important;">
+            <h4><i class="fa fa-info"></i> Note:</h4>
+            Cette commande as déjà été payée par le client. Preparer la commande pour la livraison.
+        </div>
+    }
+    else if (Model.Status == Orders.Statut.Ready)
+    {
+        <div class="callout callout-warning" style="margin-bottom: 0!important;">
+            <h4><i class="fa fa-info"></i> Noté:</h4>
+            Cette commande est en attente de paiement. Vous pouvez à tout moment marquer cette commande comme indisponible.
+        </div>
+    }
+    else if (Model.Status == Orders.Statut.Delivered)
+    {
+        <div class="callout callout-success" style="margin-bottom: 0!important;">
+            <h4><i class="fa fa-info"></i> Noté:</h4>
+            Merci, cette commande à été livrée.
+        </div>
+    }
+    else
+    {
+        <div class="callout callout-danger" style="margin-bottom: 0!important;">
+            <h4><i class="fa fa-warning"></i> Noté:</h4>
+            Cette commande n'as pas encore été payer par le client. Vous devez donner votre approbation avant qu'il lui soit possible de regler .
+        </div>
+    }
+
+</div>
+
+<!-- Main content -->
+<section class="invoice printableArea">
+    <!-- title row -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h2 class="d-inline"><small>Second avis médical d'experts</small><br><span class="font-size-50">Bon de commande</span></h2>
+                <div class="pull-right text-right">
+                    <p class="d-inline">@Model.Client, @Model.Address</p>
+                    <p class="pt-10"><strong>Contact: (00) @Model.Contact &nbsp;&nbsp;&nbsp;&nbsp; Email:</strong></p>
+                </div>
+            </div>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- info row -->
+    <div class="row invoice-info">
+        <div class="col-md-6 invoice-col">
+            <strong>Adréssé à</strong>
+            <address>
+                <strong class="text-blue font-size-24">@Model.Supplier</strong><br>
+                @Model.SupAddress<br>
+                <strong>Contact: (00) @Model.SupContact &nbsp;&nbsp;&nbsp;&nbsp; Email: </strong>
+            </address>
+        </div>
+        <!-- /.col -->
+        <div class="col-md-6 invoice-col text-right">
+            <h5>Date</h5>
+            <h3>@Model.OrderDate</h3>
+        </div>
+        <!-- /.col -->
+        <div class="col-sm-12 invoice-col">
+            <div class="invoice-details row no-margin bg-dark">
+                <div class="col-md-6 col-lg-3"><b>N° Commande:</b> CN @Model.OrderNomber</div>
+            </div>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    <!-- Table row -->
+    <div class="row">
+        <div class="col-12 table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Description</th>
+                        <th class="text-right">Quantité</th>
+                        <th class="text-right">Prix Unitaire</th>
+                        <th class="text-right">Sous Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.details.ToList().Count != 0)
+                    {
+                        foreach (OrderDetails det in Model.details)
+                        {
+                    <tr>
+                        <td>@i</td>
+                        <td>@det.ProductName</td>
+                        <td>@Math.Round(det.UnitPrice,2) @Model.Currency</td>
+                        <td>@det.Quantity</td>
+                        <td>@Math.Round((det.UnitPrice * det.Quantity),2) @Model.Currency</td>
+                    </tr>
+                            total += (@det.UnitPrice * @det.Quantity);
+                            i += 1;
+                        }
+                        //tva = (10 * total) / 100;
+                        totalTTC = Math.Round((total), 0);
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+
+    <div class="row">
+        <!-- accepted payments column -->
+        <div class="col-12 col-sm-6">
+            <p class="lead"><b>Paiements accepté:</b></p>
+            <img src="~//images/visa.png" alt="Visa">
+            <img src="~/images/mastercard.png" alt="Mastercard">
+            <img src="~//images/american-express.png" alt="American Express">
+            <img src="~/images/paypal2.png" alt="Paypal">
+            <img src="~/images/mtn-orange-money.png" alt="Orange Money et MTN Mobile money" width="51" height="32">
+           
+        </div>
+        <!-- /.col -->
+        <div class="col-12 col-sm-6 text-right">
+            <div>
+                <p>Sous - Total : @total @Model.Currency</p>
+               @* <p>Frais opérationnel (10%)  : @tva @Model.Currency</p>*@
+            </div>
+            <div class="total-payment">
+                <h3><b>Total :</b>  @totalTTC @Model.Currency</h3>
+            </div>
+
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    <!-- this row will not appear when printing -->
+    <div class="row no-print">
+        <div class="col-12">
+            <button id="print" class="btn btn-warning" type="button"> <span><i class="fa fa-print"></i> Imprimer</span> </button>
+            @if (Model.Status == Orders.Statut.Pending)
+            {
+                <button type="button" class="btn btn-success pull-right" id="validate">
+                    <i class="fa fa-check"></i> Transmettre pour paiement
+                </button>
+            }
+            else if (Model.Status == Orders.Statut.Paid)
+            {
+                <button type="button" class="btn btn-success pull-right" id="delivered">
+                    <i class="fa fa-check"></i> Livrer
+                </button>
+            }
+            else if(Model.Status == Orders.Statut.Ready)
+            {
+                <button type="button" class="btn btn-success pull-right" id="unavailable">
+                    <i class="fa fa-times"></i> Indisponible
+                </button>
+            }
+            <a href="@Url.Action("orders","admin")?group=commandes&page=list" class="btn btn-danger pull-right" style="margin-right: 5px;">
+                <i class="fa fa-cart-arrow-down"></i>Listes des Commandes
+            </a>
+        </div>
+    </div>
+</section>
+<script src="~/assets/vendor_plugins/JqueryPrintArea/demo/jquery.PrintArea.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#print").click(function () {
+            var mode = 'iframe'; //popup
+            var close = mode == "popup";
+            var options = {
+                mode: mode,
+                popClose: close
+            };
+            $("section.printableArea").printArea(options);
+        });
+
+        $('#validate').click(function () {
+            var obj = $(this);
+             $.ajax({
+                url: "@Url.Action("Validate","admin")",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify({
+                    id: "@Model.Id"
+                }),
+                beforeSend: function () {
+                    obj.html('<span class="fa fa-spinner fa-spin"></span> Patientez...');
+                    obj.attr('disabled', true);
+                },
+                success: function (result) {
+                    obj.html('<i class="fa fa-check"></i> valider');
+                    obj.attr('disabled', false);
+                    if (result.success) {
+                        swal("Succès", "Validé et envoyé pour paiement", "success");
+                        setTimeout(function () { location.reload(); }, 2000);
+                    }
+                    else {
+                        swal("Echec", result.message, "error");
+                    }
+                },
+                error: function (err) {
+                    obj.html('<i class="fa fa-check"></i> valider');
+                    obj.attr('disabled', false);
+                    swal("Erreur", err.responseText, "error");
+                }
+            });
+        });
+
+        $('#delivered').click(function () {
+            var obj = $(this);
+            swal({
+                title: "Signer le retrait",
+                text: "Saissisez le code de vérification de la commande",
+                type: "input",
+                showCancelButton: true,
+                closeOnConfirm: false,
+                animation: "slide-from-top",
+                showLoaderOnConfirm: true,
+                inputPlaceholder: "Code vérification"
+            }, function (inputValue) {
+                if (inputValue == "@Model.Code") {
+                    $.ajax({
+                        url: "@Url.Action("MarkDelivered", "admin")",
+                        type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify({
+                            id: "@Model.Id"
+                        }),
+                        beforeSend: function () {
+                            obj.html('<span class="fa fa-spinner fa-spin"></span> Patientez...');
+                            obj.attr('disabled', true);
+                        },
+                        success: function (result) {
+                            obj.html('<i class="fa fa-check"></i> valider');
+                            obj.attr('disabled', false);
+                            if (result.success) {
+                                swal("Succès", "Marqué comme livré", "success");
+                                setTimeout(function () { location.reload(); }, 2000);
+                            }
+                            else {
+                                swal("Echec", result.message, "error");
+                            }
+                        },
+                        error: function (err) {
+                            obj.html('<i class="fa fa-check"></i> valider');
+                            obj.attr('disabled', false);
+                            swal("Erreur", err.responseText, "error");
+                        }
+                    });
+                }
+                else {
+                    swal("Echec!", "Le code retrait ne correspond pas", "error");
+                    return;
+                }
+            });
+             
+        });
+
+        $('#unavailable').click(function () {
+            swal("Bientôt disponible", "Vous serez notifié par mail", "success");
+        });
+    });
+</script>

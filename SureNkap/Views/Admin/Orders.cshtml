@@ -1,0 +1,206 @@
+﻿@using SureNkap.EsameService
+@{
+    ViewBag.Title = "Orders";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="col-12">
+    <div class="box">
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="table-responsive">
+                <table id="tbl-orders" class="table table-bordered table-striped dataTable">
+                    <thead>
+                        <tr>
+                            <th>N#</th>
+                            <th>CLIENTS</th>
+                            <th>TOTAL</th>
+                            <th>PRODUITS</th>
+                            <th>DATE</th>
+                            <th>STATUT</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+</div>
+@section Datatables
+{
+    @Styles.Render("~/Content/datatables")
+    @Scripts.Render("~/bundles/datatables")
+    <link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/css/dataTables.checkboxes.css" rel="stylesheet" />
+    <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl-orders').dataTable({
+            'ajax':
+            {
+                url: "@Url.Action("GetOrders", "admin")",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json"
+
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            "columnDefs": [
+               
+                {
+                    'targets': 6,
+                    'render': function (data, type, row) {
+                        if (row["Status"] == -2) {
+                            return '<button class="btn btn-pink btn-sm m-lg-5 view" name="@Url.Action("OrderDetails","admin")/' + row["Id"] + '?group=commandes&page=view"><i class="fa fa-eye"></i></button><button class="btn btn-primary btn-sm m-lg-5 validate" type="button" name="' + row["Id"] + '">Valider</button>';
+                        }
+                        else if (row["Status"] == -1) {
+                            return '<button class="btn btn-pink btn-sm m-lg-5 view" name="@Url.Action("OrderDetails","admin")/' + row["Id"] + '?group=commandes&page=view"><i class="fa fa-eye"></i></button><button class="btn btn-primary btn-sm m-lg-5" type="button" ><i class="fa fa-check"></i> Validé</button>';
+                        }
+                        else if (row["Status"] == 0) {
+                            return '<button class="btn btn-pink btn-sm m-lg-5 view" name="@Url.Action("OrderDetails","admin")/' + row["Id"] + '?group=commandes&page=view"><i class="fa fa-eye"></i></button>';
+                        }
+                        else {
+                            return '<button class="btn btn-pink btn-sm m-lg-5 view" name="@Url.Action("OrderDetails","admin")/' + row["Id"] + '?group=commandes&page=view"><i class="fa fa-eye"></i></button>';
+                        }
+                    }
+                }
+
+            ],
+            'columns': [
+                { 'data': 'Number' },
+                { 'data': 'Client' },
+                { 'data': 'Amount' },
+                { 'data': 'ProductCount' },
+                { 'data': 'DateOrdered' },
+                {
+                    'data': 'Status',
+                    'render': function (Status) {
+                        if (Status == -2) {
+                            return '<span class="badge badge-warning">Attende de validation</span>';
+                        }
+                        else if (Status == -1) {
+                            return '<span class="badge badge-primary">Envoyé pour paiement</span>';
+                        }
+                        else if (Status == 0) {
+                            return '<span class="badge badge-success">Préparation livraison</span>';
+                        }
+                        else {
+                            return '<span class="badge badge-secondary">Livrée</span>';
+                        }
+                    }
+                },
+                {
+                    'data': 'Id'
+                    
+                }
+
+            ],
+            "language":
+            {
+                "info": "Afficher la page _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucune donnée à afficher",
+                "infoFiltered": " - Trié de _MAX_ enregistrement",
+                "lengthMenu": "Afficher _MENU_ enregistrements",
+                "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                "loadingRecords": "Veillez patienter - Chargement...",
+                "processing": "DataTables est actuellement occupé",
+                "search": "RECHERCHE:",
+                "zeroRecords": "Aucun enregistrement à afficher",
+                "paginate":
+                {
+                    "next": "Suivant",
+                    "last": "Dernière Page",
+                    "first": "Première Page",
+                    "previous": "Précédent",
+                    "emptyTable": "aucune donnée disponible",
+
+                },
+
+            }
+        });
+
+        $('#tbl-orders tbody').on('click', 'button.validate', function () {
+            var obj = $(this);
+            $.ajax({
+                url: "@Url.Action("Validate","admin")",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify({
+                    id: $(this).attr('name')
+                }),
+                beforeSend: function () {
+                    obj.html('<span class="fa fa-spinner fa-spin"></span> Patientez...');
+                    obj.attr('disabled', true);
+                },
+                success: function (result) {
+                    obj.html('valider');
+                    obj.attr('disabled', false);
+                    if (result.success) {
+                        swal("Succès", "Validé et envoyé pour paiement", "success");
+                        $('#tbl-orders').DataTable().ajax.reload();
+                    }
+                    else {
+                        swal("Echec", result.message, "error");
+                    }
+                },
+                error: function (err) {
+                    obj.html('valider');
+                    obj.attr('disabled', false);
+                    swal("Erreur", err.responseText, "error");
+                }
+            });
+        });
+
+        $('#tbl-orders tbody').on('click', 'button.delivered', function () {
+            var obj = $(this);
+             $.ajax({
+                url: "@Url.Action("MarkDelivered","admin")",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify({
+                    id: $(this).attr('name')
+                 }),
+                 beforeSend: function () {
+                     obj.html('<span class="fa fa-spinner fa-spin"></span> Patientez...');
+                     obj.attr('disabled', true);
+                 },
+                 success: function (result) {
+                     obj.html('livrer');
+                     obj.attr('disabled', false);
+                    if (result.success) {
+                        swal("Succès", "Validé et envoyé pour paiement", "success");
+                        $('#tbl-orders').DataTable().ajax.reload();
+                    }
+                    else {
+                        swal("Echec", result.message, "error");
+                    }
+                },
+                 error: function (err) {
+                     obj.html('livrer');
+                     obj.attr('disabled', false);
+                    swal("Erreur", err.responseText, "error");
+                }
+            });
+        });
+
+         $('#tbl-orders tbody').on('click', 'a.view', function () {
+             var obj = $(this);
+             var url = obj.attr('name');
+             window.open(url);
+        });
+
+        $('#tbl-orders tbody').on('click', 'button.view', function () {
+            var obj = $(this);
+            var url = obj.attr('name');
+            location.href=url;
+        });
+
+
+    });
+</script>

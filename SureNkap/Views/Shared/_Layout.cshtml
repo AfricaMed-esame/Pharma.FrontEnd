@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - E-same</title>
+
+    <environment include="Development">
+        @Styles.Render("~/Content/login")
+        @Scripts.Render("~/bundles/login")
+    </environment>
+   
+</head>
+<body class="hold-transition login-page">
+    @*<partial name="_CookieConsentPartial" />*@
+
+    <div class="container h-p100">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; 2019 - SureNkap</p>
+        </footer>
+    </div>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

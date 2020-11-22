@@ -1,0 +1,253 @@
+﻿@model SureNkap.EsameService.Pharmacies
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<section class="content">
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            @if (Model.Currency == "" || Model.Currency == null || Model.TimeZone == "" || Model.TimeZone == null)
+            {
+                <div class="alert alert-danger"> <p><i class="fa fa-warning"></i> Attention vous devez renseigner votre devise et fuseau horraire avant pour activer votre compte. Cliquer <a href="@Url.Action("profil","admin",new { id = Model.Id })" class="link-black">ici</a> pour definir votre devise et/ou votre fuseau horraire maintenant.</p> </div>
+            }
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box">
+                <span class="info-box-icon bg-warning rounded"><i class="fa fa-file"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-number">@ViewBag.countDemande</span>
+                    <span class="info-box-text">Demandes</span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box">
+                <span class="info-box-icon bg-info rounded"><i class="fa fa-balance-scale"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-number">@ViewBag.countProf</span>
+                    <span class="info-box-text">Proformas</span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box">
+                <span class="info-box-icon bg-info rounded"><i class="fa fa-cart-plus"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-number">@ViewBag.countOrd</span>
+                    <span class="info-box-text">Commnades</span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box">
+                <span class="info-box-icon bg-success rounded"><i class="fa fa-money"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-number">@ViewBag.countBils</span>
+                    <span class="info-box-text">Factures & Paiements</span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="box">
+            <div class="box-body">
+                <h5 class="text-primary">10 dernières demandes de proforma</h5>
+                <div class="table-responsive">
+                    <table id="tbl-listings" class="table table-bordered table-striped dataTable">
+                        <thead>
+                            <tr>
+                                <th>CLIENTS</th>
+                                <th>PRESCRIPTIONS</th>
+                                <th>DATES</th>
+                                <th>N° ORDONNANCES</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+</section>
+@section Datatables
+{
+    @Styles.Render("~/Content/datatables")
+    @Scripts.Render("~/bundles/datatables")
+    <link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/css/dataTables.checkboxes.css" rel="stylesheet" />
+    <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl-listings').dataTable({
+            'ajax':
+            {
+                url: "@Url.Action("GetLast10Request", "admin")",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json"
+
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            'columnDefs': [
+                {
+                    'targets': 4,
+                    'render': function (data, type,row) {
+                        return '<button class="btn btn-primary btn-sm btn-sm m-lg-5 create-prof" href="#" name="' + row["Id"] + '?products=' + row["Products"] + '&group=demandes&page=proforma"><i class="fa fa-plus"></i> Créer une proforma</button>';
+                    }
+                }
+            ],
+            'columns': [
+                { 'data': 'Clients' },
+                { 'data': 'Count' },
+                { 'data': 'Date' },
+                { 'data': 'OrdonnanceRef' },
+                {
+                    'data': 'Id'
+                   
+                }
+
+            ],
+            "language":
+            {
+                "info": "Afficher la page _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucune donnée à afficher",
+                "infoFiltered": " - Trié de _MAX_ enregistrement",
+                "lengthMenu": "Afficher _MENU_ enregistrements",
+                "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                "loadingRecords": "Veillez patienter - Chargement...",
+                "processing": "DataTables est actuellement occupé",
+                "search": "RECHERCHE:",
+                "zeroRecords": "Aucun enregistrement à afficher",
+                "paginate":
+                {
+                    "next": "Suivant",
+                    "last": "Dernière Page",
+                    "first": "Première Page",
+                    "previous": "Précédent",
+                    "emptyTable": "aucune donnée disponible",
+
+                },
+
+            }
+        });
+
+        $('#tbl-ordonnances').dataTable({
+            'ajax':
+            {
+                url: '@Url.Action("GetAllPrescriptions", "Admin")',
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: function () {
+                    return JSON.stringify({
+                        id: $('#txt_ord_id').val()
+                    });
+                }
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            "columnDefs": [
+                {
+                    'targets': 0,
+                    'checkboxes': {
+                        'selectRow': true,
+                        'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+                    },
+                    'render': function (data, type, row, meta) {
+                        if (type === 'display') {
+                            data = '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
+                        }
+                        return data;
+                    },
+                }
+            ],
+            'columns': [
+                { 'data': 'Id' },
+                {'data': 'ProductName'},
+                { 'data': 'Prise' },
+                { 'data': 'Quantity' },
+                {
+                    'data': 'Ordered',
+                    'render': function (Ordered) {
+                        if (Ordered == false) {
+                            return '<span class="badge badge-primary">NON</span>';
+                        }
+                        else {
+                            return '<span class="badge badge-success">OUI</span>';
+                        }
+                    }
+                },
+                { 'data': 'Pharmacy' }
+            ],
+            'checkboxes': {
+                'selectRow': true,
+                'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+            },
+            'select': {
+                'style': 'single'
+            },
+            'order': [[1, 'asc']],
+                "language":
+                {
+                    "info": "Afficher la page _PAGE_ sur _PAGES_",
+                    "infoEmpty": "Aucune donnée à afficher",
+                    "infoFiltered": " - Trié de _MAX_ enregistrement",
+                    "lengthMenu": "Afficher _MENU_ enregistrements",
+                    "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                    "loadingRecords": "Veillez patienter - Chargement...",
+                    "processing": "DataTables est actuellement occupé",
+                    "search": "RECHERCHE:",
+                    "zeroRecords": "Aucun enregistrement à afficher",
+
+                    "paginate":
+                    {
+                        "next": "Suivant",
+                        "last": "Dernière Page",
+                        "first": "Première Page",
+                        "previous": "Précédent",
+                        "emptyTable": "aucune donnée disponible",
+
+                    }
+                 }
+        });
+
+        $('#tbl-listings tbody').on('click', 'button.create-prof', function () {
+            var url = $(this).attr('name');
+            location.href = "@Url.Action("CreateQuote","admin")/" + url;
+
+        });
+
+
+        $('#btn-print-bilan').click(function () {
+            var selectedIds = $('#tbl-ordonnances').DataTable().columns().checkboxes.selected()[0];
+        if (selectedIds == "") {
+            swal("Aucun produit selectionner","Cliquer sur la case à cocher d'un produit pour selectionner","warning");
+            return;
+        }
+        else {
+            window.location = "@Url.Action("Devis-Add", "admin")/" + $('#txt_ord_id').val() + "?products=" + selectedIds;
+        }
+        //alert("Ids = " + selectedIds);
+        });
+
+
+    });
+</script>
+

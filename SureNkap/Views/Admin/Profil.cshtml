@@ -1,0 +1,191 @@
+﻿@using SureNkap.EsameService
+@model Pharmacies
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<section class="content">
+
+    <!-- Basic Forms -->
+    <div class="box box-solid bg-dark">
+        <div class="box-header with-border">
+            <h4 class="box-title">Modifier vos paramètres et vos préférences</h4>
+            <ul class="box-controls pull-right">
+                @*<li><a class="box-btn-close" href="#"></a></li>
+                    <li><a class="box-btn-slide" href="#"></a></li>*@
+                <li><a class="box-btn-fullscreen" href="#"></a></li>
+            </ul>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs customtab" role="tablist">
+                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#account" role="tab"><span class="hidden-sm-up"><i class="ion-home"></i></span> <span class="hidden-xs-down">Compte</span></a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cashin" role="tab"><span class="hidden-sm-up"><i class="ion-person"></i></span> <span class="hidden-xs-down">Messageries</span></a> </li>
+            </ul>
+            @if (ViewBag.message != "" && ViewBag.message != null)
+            {
+                <div class="alert alert-success alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h4><i class="icon fa fa-check"></i> Succès!</h4>
+                    @ViewBag.message
+                </div>
+            }
+            @if (ViewBag.error != "" && ViewBag.error != null)
+            {
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h4><i class="icon fa fa-ban"></i> Echec!</h4>
+                    @ViewBag.error
+                </div>
+            }
+            <div class="tab-content">
+                <div class="tab-pane active" id="account" role="tabpanel">
+                    <div class="pad">
+                        <div class="col">
+                            @using (Html.BeginForm("Account-edit", "Admin", FormMethod.Post, new { id = "form-add-user", novalidate = "novalidate" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(m => Model.Id, htmlAttributes: new { @name = "Id" })
+                                <div class="row">
+                                    <div class="col-lg-6 col-12">
+                                        <div class="form-group">
+                                            <h5>Raison Sociale <span class="text-danger">*</span></h5>
+                                            <div class="controls">
+                                                <input type="text" name="names" id="names" value="@Model.CommercialName" class="form-control" required data-validation-required-message="Champs obligatoire">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5>RCCM <span class="text-danger">*</span></h5>
+                                            <div class="controls">
+                                                <input type="text" name="rccm" id="rccm" value="@Model.Rccm" class="form-control" required data-validation-required-message="Champs obligatoire">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" id="data-employee">
+                                            <h5>Contact<span class="text-danger">*</span></h5>
+                                            <div class="controls">
+                                                <input type="text" name="contact" value="@Model.Contact" id="contact" class="form-control" required data-validation-required-message="Champs obligatoire">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5>Pays <span class="text-danger">*</span></h5>
+                                            <div class="controls">
+                                                @Html.DropDownListFor(m => Model.Country, ViewBag.countries as SelectList, "--Choisir--", htmlAttributes: new { required = true, data_validation_required_message = "Champs obligatoire", @class = "form-control", @name = "country", id = "country" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5 class="text-danger">Devise <span class="text-danger">*</span></h5>
+                                            <div class="controls">
+                                                @Html.DropDownListFor(m => Model.Currency, ViewBag.currencies as SelectList, "--Choisir--", htmlAttributes: new { required = true, data_validation_required_message = "Champs obligatoire", @class = "form-control", @name = "currency", id = "currency" })
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-6 col-12">
+                                        <div class="form-group" id="data-employee">
+                                            <h5>Gestionnaire</h5>
+                                            <div class="controls">
+                                                <input type="text" name="manager" value="@Model.ManagerNames" id="manager" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="form-group" id="data-employee">
+                                            <h5>Contact Gestionnaire</h5>
+                                            <div class="controls">
+                                                <input type="text" name="mcontact" id="mcontact" value="@Model.ManagerContact" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5>Fuseau Horraire <span class="text-danger">*</span></h5>
+                                            <div class="controls">
+                                                @Html.DropDownListFor(m => Model.TimeZone, ViewBag.timezones as SelectList, "--Choisir--", htmlAttributes: new { required = true, data_validation_required_message = "Champs obligatoire", @class = "form-control", @name = "timezone", id = "timezone" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <h5>Ville</h5>
+                                            <div class="controls">
+                                                <input type="text" name="city" id="city" value="@Model.City" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5>Addresse de localisation</h5>
+                                            <div class="controls">
+                                                <textarea name="adress" id="adress" class="form-control" placeholder="Textarea text">@Model.Address</textarea>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="text-xs-right">
+                                    <button type="submit" class="btn btn-info">Enregistrer</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane pad" id="cashin" role="tabpanel">
+                    <div class="pad">
+                        <div class="row">
+                            <div class="col-lg-6 col-12">
+                                <div class="form-group">
+                                    <h5>Tituliare du compte</h5>
+                                    <div class="controls">
+                                        <select class="form-control" required>
+                                            <option value="">Yahoo</option>
+                                            <option value="">Gmail</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <h5>Mot de passe</h5>
+                                    <div class="controls">
+                                        <input type="password" name="password" class="form-control" required>
+                                    </div>
+                                </div>
+                                <button class="btn btn-purple margin-r-5" id="btn-cashIn" type="button">Enregistrer</button>
+                            </div>
+                            <div class="col-lg-6 col-12">
+                                <div class="form-group">
+                                    <h5>Adresse email</h5>
+                                    <div class="controls">
+                                        <input type="email" name="email" value="" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <h5>Confirmer mot de passe<span class="text-danger">*</span></h5>
+                                    <div class="controls">
+                                        <input type="password" name="cpassword" value="" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <h5>Delais de synchronisation (Minutes)</h5>
+                                    <div class="controls">
+                                        <input type="number" name="time"  value="" class="form-control">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+</section>
+<script type="text/javascript">
+    !function(window, document, $) {
+        "use strict";
+			$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
+    }(window, document, jQuery);
+</script>
+

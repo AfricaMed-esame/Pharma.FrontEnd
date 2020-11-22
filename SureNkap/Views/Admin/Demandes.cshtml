@@ -1,0 +1,229 @@
+﻿
+@{
+    ViewBag.Title = "ListOrdonnances";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="col-12">
+    <div class="box">
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="table-responsive">
+                <table id="tbl-listings" class="table table-bordered table-striped dataTable">
+                    <thead>
+                        <tr>
+                            <th>Clients</th>
+                            <th>PRESCRIPTIONS</th>
+                            <th>Date</th>
+                            <th>N° ORDONNANCE</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <input type="hidden" value="0" , id="txt_ord_id" />
+            
+            <button class="btn btn-primary btn-sm" id="btn-print-bilan" type="button" style="display:none;margin-top:5%;">Créer une proforma</button>
+            <hr />
+            <div class="table-responsive" id="table-details" style="display:none;">
+                <table class="table table-bordered table-striped table-hover" id="tbl-ordonnances">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Produits</th>
+                            <th>Posologie</th>
+                            <th>Dose</th>
+                            <th>Livré</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+</div>
+<!-- Modal -->
+<div class="modal center-modal fade" id="modal-center" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mes demandes</h5>
+
+            </div>
+            <div class="modal-body">
+                <p>Your content comes here</p>
+            </div>
+            <div class="modal-footer modal-footer-uniform">
+                <button type="button" class="btn btn-bold btn-pure btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-bold btn-pure btn-info float-right">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.modal -->
+@section Datatables
+{
+    @Styles.Render("~/Content/datatables")
+    @Scripts.Render("~/bundles/datatables")
+    <link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/css/dataTables.checkboxes.css" rel="stylesheet" />
+    <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl-listings').dataTable({
+            'ajax':
+            {
+                url: "@Url.Action("GetQuoteRequest", "admin")",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json"
+
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            'columns': [
+                { 'data': 'Clients' },
+                { 'data': 'Count' },
+                { 'data': 'Date' },
+                { 'data': 'OrdonnanceRef' },
+                {
+                    'data': 'Id',
+                    'render': function (Id) {
+                        return '<button class="btn btn-primary btn-sm btn-sm m-lg-5 details" href="#" name="' + Id + '"><i class="fa fa-eye"></i> Voir les prescriptions</button>';
+                    }
+                }
+
+            ],
+            "language":
+            {
+                "info": "Afficher la page _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucune donnée à afficher",
+                "infoFiltered": " - Trié de _MAX_ enregistrement",
+                "lengthMenu": "Afficher _MENU_ enregistrements",
+                "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                "loadingRecords": "Veillez patienter - Chargement...",
+                "processing": "DataTables est actuellement occupé",
+                "search": "RECHERCHE:",
+                "zeroRecords": "Aucun enregistrement à afficher",
+                "paginate":
+                {
+                    "next": "Suivant",
+                    "last": "Dernière Page",
+                    "first": "Première Page",
+                    "previous": "Précédent",
+                    "emptyTable": "aucune donnée disponible",
+
+                },
+
+            }
+        });
+
+        $('#tbl-ordonnances').dataTable({
+            'ajax':
+            {
+                url: '@Url.Action("GetRequestDetails", "Admin")',
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: function () {
+                    return JSON.stringify({
+                        id: $('#txt_ord_id').val()
+                    });
+                }
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            "columnDefs": [
+                {
+                    'targets': 0,
+                    'checkboxes': {
+                        'selectRow': true,
+                        'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+                    },
+                    'render': function (data, type, row, meta) {
+                        if (type === 'display') {
+                            data = '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
+                        }
+                        return data;
+                    },
+                }
+            ],
+            'columns': [
+                { 'data': 'Id' },
+                {'data': 'ProductName'},
+                { 'data': 'Prise' },
+                { 'data': 'Quantity' },
+                {
+                    'data': 'Ordered',
+                    'render': function (Ordered) {
+                        if (Ordered == false) {
+                            return '<span class="badge badge-primary">NON</span>';
+                        }
+                        else {
+                            return '<span class="badge badge-success">OUI</span>';
+                        }
+                    }
+                }
+            ],
+            'checkboxes': {
+                'selectRow': true,
+                'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+            },
+            'select': {
+                'style': 'single'
+            },
+            'order': [[1, 'asc']],
+                "language":
+                {
+                    "info": "Afficher la page _PAGE_ sur _PAGES_",
+                    "infoEmpty": "Aucune donnée à afficher",
+                    "infoFiltered": " - Trié de _MAX_ enregistrement",
+                    "lengthMenu": "Afficher _MENU_ enregistrements",
+                    "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                    "loadingRecords": "Veillez patienter - Chargement...",
+                    "processing": "DataTables est actuellement occupé",
+                    "search": "RECHERCHE:",
+                    "zeroRecords": "Aucun enregistrement à afficher",
+
+                    "paginate":
+                    {
+                        "next": "Suivant",
+                        "last": "Dernière Page",
+                        "first": "Première Page",
+                        "previous": "Précédent",
+                        "emptyTable": "aucune donnée disponible",
+
+                    }
+                 }
+        });
+
+    $('#tbl-listings tbody').on('click', 'button.details', function () {
+        var id = $(this).attr('name');
+        $('#txt_ord_id').val(id);
+        $('#tbl-ordonnances').DataTable().ajax.reload();
+        $('#tbl-ordonnances').width('100%');
+        $('#table-details').show();
+        $('#btn-print-bilan').show();
+
+    });
+
+
+    $('#btn-print-bilan').click(function () {
+            var selectedIds = $('#tbl-ordonnances').DataTable().columns().checkboxes.selected()[0];
+        if (selectedIds == "") {
+            swal("Aucun produit selectionner","Cliquer sur la case à cocher d'un produit pour selectionner","warning");
+            return;
+        }
+        else {
+            window.location = "@Url.Action("CreateQuote", "admin")/" + $('#txt_ord_id').val() + "?products=" + selectedIds + "&group=demandes&page=proforma";
+        }
+        //alert("Ids = " + selectedIds);
+    });
+
+
+});
+</script>
+

@@ -1,0 +1,353 @@
+﻿@{
+    ViewBag.Title = "ListDevis";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="col-12">
+    <div class="box">
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="table-responsive">
+                <table id="tbl-listings" class="table table-bordered table-striped dataTable">
+                    <thead>
+                        <tr>
+
+                            <th>Patient</th>
+                            <th>Montant Total</th>
+                            <th>Prescriptions</th>
+                            <th>Ordonnance</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <hr class="margin-top-30" />
+            <h3 class="text-primary margin-top-20"><small>Details</small></h3>
+            <button id="delete-pres" class="btn btn-danger btn-sm  pull-right" style="display:none;"><i class="ti-trash"></i> supprimer</button>
+            <input type="hidden" id="txt-ord-id" value="0" />
+            <div class="table-responsive" id="table-details" style="display:none;">
+                <table id="tbl-devis" class="table table-bordered table-striped dataTable">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Produits</th>
+                            <th>Equivalents</th>
+                            <th>Prix Unitaire</th>
+                            <th>Qte</th>
+                            <th>Nature</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+</div>
+
+@section Datatables
+{
+    @Styles.Render("~/Content/datatables")
+    @Scripts.Render("~/bundles/datatables")
+    <link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/css/dataTables.checkboxes.css" rel="stylesheet" />
+    <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl-listings').dataTable({
+            'ajax':
+            {
+                url: "@Url.Action("GetQuotes", "admin")",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json"
+
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            "columnDefs": [
+                {
+                    'targets': 6,
+                    'render': function (data, type, row, meta) {
+                        if (row["Status"] === 0) {
+                            return '<button class="btn btn-primary btn-sm m-lg-5 details" type="button" name="' + row["Id"] + '"><i class="fa fa-eye"></i> Details</button><button class="btn btn-success btn-sm send m-lg-5" name="' + row["Id"] + '"><i class="fa fa-envelope"></i></button><button class="btn btn-danger btn-sm delete" name="' + row["Id"] + '"><i class="ti-trash"></i></button>';
+                        }
+                        else {
+                            return '<button class="btn btn-primary btn-sm m-lg-5 details" type="button" name="' + row["Id"] + '"><i class="fa fa-eye"></i> Details</button>';
+                        }
+                       
+                    },
+
+                }
+
+            ],
+            'columns': [
+               
+                { 'data': 'Patient' },
+                { 'data': 'Montant' },
+                { 'data': 'TotalProduits' },
+                { 'data': 'OrdonnanceRef' },
+                { 'data': 'Date' },
+                {
+                    'data': 'Status',
+                    'render': function (Status) {
+                        if (Status == 0) {
+                            return '<span class="badge badge-warning">Brouillon</span>';
+                        }
+                        else {
+                            return '<span class="badge badge-success">Envoyé</span>';
+                        }
+                    }
+                },
+                {
+                    'data': 'Id'
+                    
+                }
+
+            ],
+           
+            "language":
+            {
+                "info": "Afficher la page _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucune donnée à afficher",
+                "infoFiltered": " - Trié de _MAX_ enregistrement",
+                "lengthMenu": "Afficher _MENU_ enregistrements",
+                "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                "loadingRecords": "Veillez patienter - Chargement...",
+                "processing": "DataTables est actuellement occupé",
+                "search": "RECHERCHE:",
+                "zeroRecords": "Aucun enregistrement à afficher",
+                "paginate":
+                {
+                    "next": "Suivant",
+                    "last": "Dernière Page",
+                    "first": "Première Page",
+                    "previous": "Précédent",
+                    "emptyTable": "aucune donnée disponible",
+
+                },
+
+            }
+        });
+
+        $('#tbl-devis').dataTable({
+            'ajax':
+            {
+                url: "@Url.Action("GetQuoteDetails", "admin")",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: function () {
+                    return JSON.stringify({
+                        id: $('#txt-ord-id').val()
+                    });
+                }
+
+            },
+            'paging': true,
+            'sort': true,
+            'searching': true,
+            "columnDefs": [
+                {
+                    'targets': 0,
+                    'checkboxes': {
+                        'selectRow': true,
+                        'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+                    },
+                    'render': function (data, type, row, meta) {
+                        if (type === 'display') {
+                            data = '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
+                        }
+                        return data;
+                    },
+
+                }
+
+            ],
+            'columns': [
+                { 'data': 'Id' },
+                { 'data': 'Product' },
+                { 'data': 'Equivalent' },
+                { 'data': 'UnitPrice' },
+                { 'data': 'Quantity' },
+                { 'data': 'Unit' }
+            ],
+            'checkboxes': {
+                'selectRow': true,
+                'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+            },
+            'select': {
+                'style': 'single'
+            },
+            'order': [[1, 'asc']],
+            "language":
+            {
+                "info": "Afficher la page _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucune donnée à afficher",
+                "infoFiltered": " - Trié de _MAX_ enregistrement",
+                "lengthMenu": "Afficher _MENU_ enregistrements",
+                "lengthMenu": 'Afficher <select>' + '<option value="10">10</option>' + '<option value="20">20</option>' + '<option value="30">30</option>' + '<option value="40">40</option>' + '<option value="-1">Tous</option>' + '</select> enregistrements',
+                "loadingRecords": "Veillez patienter - Chargement...",
+                "processing": "DataTables est actuellement occupé",
+                "search": "RECHERCHE:",
+                "zeroRecords": "Aucun enregistrement à afficher",
+                "paginate":
+                {
+                    "next": "Suivant",
+                    "last": "Dernière Page",
+                    "first": "Première Page",
+                    "previous": "Précédent",
+                    "emptyTable": "aucune donnée disponible",
+
+                },
+
+            }
+        });
+
+        $('#tbl-listings tbody').on('click', 'button.details', function () {
+            var id = $(this).attr('name');
+            $('#txt-ord-id').val(id);
+            $.ajax({
+                url: "@Url.Action("GetQuoteStatus","admin")/" + id,
+                type: "Get",
+                success: function (result) {
+                    if (result == 0) {
+                        $('#delete-pres').show();
+                    }
+                    else {
+                        $('#delete-pres').hide();
+                    }
+                },
+                error: function (err) {
+                    Console.log(err.responseText);
+                }
+            });
+            $('#tbl-devis').DataTable().ajax.reload();
+            $('#tbl-devis').width('100%');
+            $('#table-details').show();
+
+        });
+
+        
+        $('#tbl-listings tbody').on('click', 'button.send', function () {
+            var id = $(this).attr('name');
+            swal({
+                title: "Continuer ?",
+                text: "Vous allez envoyer cette proforma au patient. Vous ne pourrez plus la modifier",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Oui envoyer",
+                cancelButtonText: "Non annuler",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm) {
+                        $.ajax({
+                        url: "@Url.Action("SendQuote","admin")",
+                         type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data:JSON.stringify({
+                            requestId:id
+                        }),
+                        success: function (result) {
+                            swal("Succès", "Envoyé", "success");
+                            $('#tbl-listings').DataTable().ajax.reload();
+                            $('#table-details').hide();
+                        },
+                        error: function (err) {
+                            swal("Erreur", err.responseText, "error");
+                        }
+                    });
+                }
+            });
+      
+        });
+
+        $('#tbl-listings tbody').on('click', 'button.delete', function () {
+            var id = $(this).attr('name');
+            swal({
+                title: "Supprimer ?",
+                text: "Cette opération est irreversible",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Oui supprimer",
+                cancelButtonText: "Non annuler",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm) {
+                        $.ajax({
+                        url: "@Url.Action("DelQuote","admin")",
+                         type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data:JSON.stringify({
+                            requestId:id
+                        }),
+                        success: function (result) {
+                            swal("Succès", "Supprimé", "success");
+                            $('#tbl-listings').DataTable().ajax.reload();
+                            $('#table-details').hide();
+                        },
+                        error: function (err) {
+                            swal("Erreur", err.responseText, "error");
+                        }
+                    });
+                }
+            });
+      
+        });
+
+        $('#delete-pres').on('click', function () {
+            var selected = $('#tbl-devis').DataTable().columns().checkboxes.selected()[0];
+            if (selected == "") {
+                swal("Aucune ligne selectionner", "cliquer sur la case à cocher pour selectionner", "warning");
+                return;
+            }
+             swal({
+                title: "Supprimer ?",
+                text: "Cette opération est irreversible",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Oui supprimer",
+                cancelButtonText: "Non annuler",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm) {
+                        $.ajax({
+                        url: "@Url.Action("DelPrescriptions", "admin")",
+                         type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data:JSON.stringify({
+                            id:selected.toString()
+                        }),
+                        success: function (result) {
+                            swal("Succès", "Supprimé", "success");
+                            $('#tbl-devis').DataTable().ajax.reload();
+                            $('#tbl-listings').DataTable().ajax.reload();
+                        },
+                        error: function (err) {
+                            swal("Erreur", err.responseText, "error");
+                        }
+                    });
+                }
+            });
+        });
+
+
+    });
+</script>
+
